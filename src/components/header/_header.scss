@@ -70,6 +70,68 @@
     }
 }
 
+.red-modal-background {
+    .modal-content {
+        background-color: #212121;
+        height: 40%;
+    }
+
+    .modal-header{
+        border-bottom: none;
+       color: #fff;
+        padding-bottom: 20%;
+        .modal-title{
+            font-size: 20px;
+        }
+    }
+
+    .modal-body{
+        
+       
+        .btn-close{
+            color: #fff;
+        }
+        .circle_active {
+            width: 50px; /* Kích thước ban đầu của hình tròn */
+            height: 50px; /* Kích thước ban đầu của hình tròn */
+            background-color: red; /* Màu nền của hình tròn */
+            border-radius: 50%; /* Tạo hình tròn */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 2s infinite alternate;
+            margin-bottom: 10px;
+            @keyframes pulse {
+                0% {
+                  transform: scale(1); /* Kích thước ban đầu */
+                }
+                100% {
+                  transform: scale(1.2); /* Kích thước lớn lên 1.2 lần */
+                }
+              }
+          }
+
+          .circle_inactive{
+            width: 50px; /* Kích thước ban đầu của hình tròn */
+            height: 50px; /* Kích thước ban đầu của hình tròn */
+            background-color: #515050; /* Màu nền của hình tròn */
+            border-radius: 50%; /* Tạo hình tròn */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+          }
+       
+    }
+    p{
+        font-size: 15px;
+    }
+   
+  }
+
+
+
 @media(max-width: $breakpoint-small){
     .header{
         padding: 1rem;
@@ -90,7 +152,4 @@
             display: none;
         }
     }
-
-    
-
 }

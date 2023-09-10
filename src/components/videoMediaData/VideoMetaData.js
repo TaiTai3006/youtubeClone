@@ -1,26 +1,90 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./_videoMetaData.scss";
 import numeral from "numeral";
 import moment from "moment";
-import { MdThumbDown, MdThumbUp } from "react-icons/md";
+import {
+  MdThumbDown,
+  MdThumbUp,
+  MdThumbDownOffAlt,
+  MdThumbUpOffAlt,
+} from "react-icons/md";
 import ShowMoreText from "react-show-more-text";
 import { useDispatch, useSelector } from "react-redux";
-import { checkSubscriptionStatus, getChannelDetails } from "../../redux/actions/channel.action";
-const VideoMediaData = ({video:{snippet, statistics}, videoId}) => {
+import {
+  checkSubscriptionStatus,
+  getChannelDetails,
+  subscribedChannel,
+  unsubscribeChannel,
+} from "../../redux/actions/channel.action";
+import { changeRating, getRating } from "../../redux/actions/videos.action";
+import { useNavigate } from "react-router-dom";
+const VideoMediaData = ({
+  video: { snippet, statistics },
+  videoId,
+  rating,
+}) => {
+  const { channelId, channelTitle, description, title, publishedAt } = snippet;
+  const { viewCount, likeCount, dislikeCount } = statistics;
 
-  const {channelId, channelTitle, description, title, publishedAt} = snippet
-  const {viewCount, likeCount, dislikeCount} = statistics
+  const dispatch = useDispatch();
+  const [isHovered, setHovered] = useState(false);
+  console.log(rating);
+  const handleMouseEnter = () => {
+    setHovered(true);
+  };
 
-  const dispatch = useDispatch()
+  const handleMouseLeave = () => {
+    setHovered(false);
+  };
 
-  const {snippet: channelSnippet, statistics: channelStatistics} = useSelector(state=>state.channelDetails.channel)
+  const {
+    snippet: channelSnippet,
+    statistics: channelStatistics,
+    id,
+  } = useSelector((state) => state.channelDetails.channel);
 
-  const subscriptionStatus = useSelector(state=> state.channelDetails.subscriptionStatus)
+  const { idSubscribed } = useSelector((state) => state.channelDetails);
 
-  useEffect(()=>{
-    dispatch(getChannelDetails(channelId))
-    dispatch(checkSubscriptionStatus(channelId))
-  },[dispatch, channelId])
+  const subscriptionStatus = useSelector(
+    (state) => state.channelDetails.subscriptionStatus
+  );
+
+  useEffect(() => {
+    dispatch(getChannelDetails(channelId));
+    dispatch(checkSubscriptionStatus(channelId));
+  }, [dispatch, channelId]);
+
+  useEffect(() => {
+    dispatch(getRating(videoId));
+  }, [dispatch, videoId]);
+
+  const handleSubscribed = () => {
+    subscriptionStatus
+      ? dispatch(unsubscribeChannel(idSubscribed, id))
+      : dispatch(subscribedChannel(id));
+  };
+  const handleLike = () => {
+    if (rating === "like") {
+      dispatch(changeRating(videoId, "none"));
+    } else {
+      dispatch(changeRating(videoId, "like"));
+    }
+  };
+
+  const handleDislike = () => {
+    if (rating === "dislike") {
+      dispatch(changeRating(videoId, "none"));
+    } else {
+      dispatch(changeRating(videoId, "dislike"));
+    }
+  };
+
+  const navigate = useNavigate();
+
+  const handleClickChannel = () => {
+    navigate(`/channel/${channelId}`);
+  };
+
   return (
     <div className="videoMetaData py-2">
       <div className="videoMetaData_top">
@@ -33,10 +97,20 @@ const VideoMediaData = ({video:{snippet, statistics}, videoId}) => {
 
           <div>
             <span className="mr-3">
-              <MdThumbUp size={26} /> {numeral(likeCount).format("0.a")}
+              {rating === "like" ? (
+                <MdThumbUp onClick={handleLike} size={26} />
+              ) : (
+                <MdThumbUpOffAlt onClick={handleLike} size={26} />
+              )}{" "}
+              {numeral(likeCount).format("0.a")}
             </span>
             <span className="mr-3">
-              <MdThumbDown size={26} /> {numeral(dislikeCount).format("0.a")}
+              {rating === "dislike" ? (
+                <MdThumbDown onClick={handleDislike} size={26} />
+              ) : (
+                <MdThumbDownOffAlt onClick={handleDislike} size={26} />
+              )}{" "}
+              {numeral(dislikeCount).format("0.a")}
             </span>
           </div>
         </div>
@@ -45,15 +119,31 @@ const VideoMediaData = ({video:{snippet, statistics}, videoId}) => {
         <div className="d-flex">
           <img
             src={channelSnippet?.thumbnails?.default?.url}
+            onClick={handleClickChannel}
             alt=""
             className="rounder-circle mr-3"
           />
           <div className="d-flex flex-column">
-            <span>{channelTitle}</span>
-            <span> {numeral(channelStatistics?.subscriberCount).format("0.a")} Subscribers</span>
+            <span onClick={handleClickChannel}>{channelTitle}</span>
+            <span>
+              {" "}
+              {numeral(channelStatistics?.subscriberCount).format("0.a")}{" "}
+              Subscribers
+            </span>
           </div>
         </div>
-        <button className={`btn border-0 p-2 m-2 ${subscriptionStatus && 'btn-gray'}`}>{subscriptionStatus ? 'Subscribed' : 'Subscribe'}</button>
+        <button
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className={`btn border-0 p-2 m-2 ${subscriptionStatus && "btn-gray"}`}
+          onClick={handleSubscribed}
+        >
+          {subscriptionStatus
+            ? isHovered
+              ? "Unsubscribe"
+              : "Subscribed"
+            : "Subscribe"}
+        </button>
       </div>
       <div className="videoMetaData_description">
         <ShowMoreText

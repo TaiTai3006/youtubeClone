@@ -11,24 +11,27 @@ import {
   getVideoById,
 } from "../../redux/actions/videos.action";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-
+import { Helmet } from "react-helmet";
 const WatchScreen = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { video, loading } = useSelector((state) => state.selectedVideo);
+  const { video, loading, rating } = useSelector(
+    (state) => state.selectedVideo
+  );
   const { videos } = useSelector((state) => state.relatedVideo);
-console.log(video)
+
   useEffect(() => {
     dispatch(getVideoById(id));
     dispatch(getRelatedVideos(video?.snippet.title));
   }, [dispatch, id, video?.snippet.title]);
 
-
-
   return (
     <Row>
+      <Helmet>
+        <title>{video?.snippet?.title}</title>
+      </Helmet>
       <Col lg={8}>
-        <div className="watchScreen_player">
+        <div className="watchScreen__player">
           <iframe
             src={`https://www.youtube.com/embed/${id}`}
             frameBorder="0"
@@ -39,10 +42,11 @@ console.log(video)
           ></iframe>
         </div>
         {!loading ? (
-          <VideoMediaData video={video} videoId={id} />
+          <VideoMediaData video={video} videoId={id} rating={rating} />
         ) : (
-          <h6>loading...</h6>
+          <h6>Loading...</h6>
         )}
+
         <Comments
           videoId={id}
           totalComments={video?.statistics?.commentCount}
@@ -51,11 +55,13 @@ console.log(video)
       <Col lg={4}>
         {!loading ? (
           videos
-            .filter((video) => video.id !== id)
-            .map((video, id) => <VideoHoziontal video={video} key={id} />)
+            ?.filter((video) => video.snippet)
+            .map((video) => (
+              <VideoHoziontal video={video} key={video.id.videoId} />
+            ))
         ) : (
-          <SkeletonTheme baseColor="#343a40" highlightColor="#3c4147">
-            <Skeleton width="100%" height="120px" count={15} />
+          <SkeletonTheme color="#343a40" highlightColor="#3c4147">
+            <Skeleton width="100%" height="130px" count={15} />
           </SkeletonTheme>
         )}
       </Col>

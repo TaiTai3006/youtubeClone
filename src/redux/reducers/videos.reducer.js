@@ -19,7 +19,8 @@ import {
   CHANNEL_VIDEOS_FAIL,
   LIKED_VIDEOS_REQUEST,
   LIKED_VIDEOS_SUCCESS,
-  LIKED_VIDEOS_FAIL
+  LIKED_VIDEOS_FAIL,
+  SET_RATING_STATUS,
 } from "../actionType";
 
 export const homeVideosReducer = (
@@ -65,6 +66,7 @@ export const selectedVideoReducer = (
   state = {
     loading: true,
     video: null,
+    rating: "",
   },
   action
 ) => {
@@ -86,6 +88,11 @@ export const selectedVideoReducer = (
         ...state,
         video: null,
         loading: false,
+      };
+    case SET_RATING_STATUS:
+      return {
+        ...state,
+        rating: payload,
       };
     default:
       return state;

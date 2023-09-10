@@ -19,7 +19,8 @@ import {
   CHANNEL_VIDEOS_FAIL,
   LIKED_VIDEOS_REQUEST,
   LIKED_VIDEOS_SUCCESS,
-  LIKED_VIDEOS_FAIL
+  LIKED_VIDEOS_FAIL,
+  SET_RATING_STATUS,
 } from "../actionType";
 import axios from "axios";
 import request from "../../api";
@@ -200,7 +201,6 @@ export const getSubscribedChannels = () => async (dispatch, getState) => {
 };
 
 export const getVideosByChannel = (id) => async (dispatch) => {
-  
   try {
     dispatch({
       type: CHANNEL_VIDEOS_REQUEST,
@@ -215,9 +215,8 @@ export const getVideosByChannel = (id) => async (dispatch) => {
         id: id,
       },
     });
-   
+
     const uploadPlaylistId = items[0].contentDetails.relatedPlaylists.uploads;
-    // 2. get the videos using the id
     const { data } = await request("/playlistItems", {
       params: {
         part: "snippet,contentDetails",
@@ -240,37 +239,59 @@ export const getVideosByChannel = (id) => async (dispatch) => {
 };
 
 export const getLikedVideos = () => async (dispatch, getState) => {
-  
-    dispatch({
-      type: LIKED_VIDEOS_REQUEST,
-    });
-    const apiUrl = `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&myRating=like&key=${process.env.REACT_APP_YT_API_KEY}`;
-    axios.defaults.headers.common['Authorization'] = `Bearer ${getState().auth.accessToken}`;
-    axios
+  dispatch({
+    type: LIKED_VIDEOS_REQUEST,
+  });
+  const apiUrl = `https://youtube.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&myRating=like&key=${process.env.REACT_APP_YT_API_KEY}`;
+  axios.defaults.headers.common["Authorization"] = `Bearer ${
+    getState().auth.accessToken
+  }`;
+  axios
     .get(apiUrl)
     .then((response) => {
-      // Lấy danh sách video đã được bạn thích từ response
-    
-     dispatch({
-      type: LIKED_VIDEOS_SUCCESS,
-      payload: response.data.items,
-    });
+      dispatch({
+        type: LIKED_VIDEOS_SUCCESS,
+        payload: response.data.items,
+      });
     })
     .catch((error) => {
       dispatch({
-      type: LIKED_VIDEOS_FAIL,
-      payload: error.response.data,
+        type: LIKED_VIDEOS_FAIL,
+        payload: error.response.data,
+      });
     });
+};
+
+export const getRating = (id) => async (dispatch, getState) => {
+  try {
+    const { data } = await request("/videos/getRating", {
+      params: {
+        id: id,
+      },
+      headers: {
+        Authorization: `Bearer ${getState().auth.accessToken}`,
+      },
     });
-    // const { data } = await request("/subscriptions", {
-    //   params: {
-    //     part: "snippet,contentDetails,statistics",
-    //     mine: true,
-    //     myRating: "like"
-    //   },
-    //   headers: {
-    //     Authorization: `Bearer ${getState().auth.accessToken}`,
-    //   },
-    // });
-    // console.log(data.items)
+    dispatch({
+      type: SET_RATING_STATUS,
+      payload: data.items[0].rating,
+    });
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+export const changeRating = (id, type) => async (dispatch, getState) => {
+  const apiUrl = `https://youtube.googleapis.com/youtube/v3/videos/rate?id=${id}&rating=${type}&key=${process.env.REACT_APP_YT_API_KEY}`;
+  axios.defaults.headers.common["Authorization"] = `Bearer ${
+    getState().auth.accessToken
+  }`;
+  axios
+    .post(apiUrl)
+    .then((response) => {
+      dispatch(getRating(id));
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 };
