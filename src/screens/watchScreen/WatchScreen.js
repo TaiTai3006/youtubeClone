@@ -19,9 +19,10 @@ const WatchScreen = () => {
     (state) => state.selectedVideo
   );
   const { videos } = useSelector((state) => state.relatedVideo);
-
+  console.log(video);
   useEffect(() => {
     dispatch(getVideoById(id));
+    console.log(id);
     dispatch(getRelatedVideos(video?.snippet.title));
   }, [dispatch, id, video?.snippet.title]);
 

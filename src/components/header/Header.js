@@ -31,7 +31,7 @@ const Header = ({ handleToggleSidebar }) => {
   //   oscillator.start();
   //   oscillator.stop(audioContext.currentTime + 0.5);
   // };
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     navigate(`/search/${input}`);
@@ -94,7 +94,9 @@ const Header = ({ handleToggleSidebar }) => {
         <MdApps size={28} />
         <img
           src={
-            typeof user === "string" ? JSON.parse(user).photoURL : user.photoURL
+            typeof user === "string"
+              ? JSON.parse(user)?.photoURL
+              : user?.photoURL
           }
           alt="Avatar"
         />

@@ -23,6 +23,7 @@ const VideoMediaData = ({
   videoId,
   rating,
 }) => {
+  console.log(snippet);
   const { channelId, channelTitle, description, title, publishedAt } = snippet;
   const { viewCount, likeCount, dislikeCount } = statistics;
 
